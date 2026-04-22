@@ -198,3 +198,5 @@ export function Tabs({
     </div>
   );
 }
+
+export type { TabsProps };

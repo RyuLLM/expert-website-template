@@ -13,8 +13,7 @@
     "test": "echo 'Tests not configured. Run npm run check for build validation.'"
   },
   "dependencies": {
-    "@splinetool/react-spline": "^2.4.0",
-    "@splinetool/runtime": "^2.4.0",
+
     "@types/node": "22.10.6",
     "@types/react": "19.0.7",
     "@types/react-dom": "19.0.3",

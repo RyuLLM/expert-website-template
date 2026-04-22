@@ -191,3 +191,5 @@ export function Modal({
     </AnimatePresence>
   );
 }
+
+export type { ModalProps };

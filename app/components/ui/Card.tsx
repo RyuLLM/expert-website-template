@@ -178,4 +178,4 @@ const CardFooter = forwardRef<HTMLDivElement, CardFooterProps>(
 CardFooter.displayName = 'Card.Footer';
 
 export { Card, CardImage, CardContent, CardFooter };
-export type { CardProps, CardVariant };
+export type { CardProps, CardVariant, CardImageProps };

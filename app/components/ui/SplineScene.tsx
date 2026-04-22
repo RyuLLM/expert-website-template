@@ -1,16 +1,9 @@
 'use client';
 
-import React, { Suspense, useState, useEffect, useCallback, useRef } from 'react';
-import dynamic from 'next/dynamic';
-import { AlertCircle, RefreshCw } from 'lucide-react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { AlertCircle, RefreshCw, Cube } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from './Button';
-
-// Dynamically import Spline to avoid SSR issues
-const Spline = dynamic(() => import('@splinetool/react-spline'), {
-  ssr: false,
-  loading: () => <LoadingFallback />,
-});
 
 interface SplineSceneProps {
   /** Spline scene URL (from spline.design) */
@@ -34,24 +27,8 @@ interface SplineSceneProps {
   /** Callback on mouse down events */
   onMouseDown?: (e: any) => void;
   /** Callback on mouse hover events */
-  onMouseHover?: (e: any) => void;
+  onMouseOver?: (e: any) => void;
 }
-
-// Hardware detection for low-end devices
-const shouldLoadSpline = (): boolean => {
-  if (typeof window === 'undefined') return true;
-  
-  const isMobile = window.innerWidth < 768;
-  const isLowEnd = navigator.hardwareConcurrency <= 2;
-  
-  // Test WebGL support
-  const canvas = document.createElement('canvas');
-  const gl = canvas.getContext('webgl2') || canvas.getContext('webgl');
-  const noWebGL = !gl;
-  
-  // Don't load on mobile/low-end/no-WebGL
-  return !isMobile && !isLowEnd && !noWebGL;
-};
 
 function LoadingFallback() {
   return (
@@ -71,10 +48,10 @@ function ErrorFallback({ onRetry }: { onRetry?: () => void }) {
     <div className="flex h-full w-full flex-col items-center justify-center rounded-2xl bg-gradient-to-br from-error-500/10 to-error-700/10 p-8">
       <AlertCircle className="mb-4 h-12 w-12 text-error-500" />
       <h3 className="mb-2 text-heading-md font-semibold text-light-900 dark:text-dark-50">
-        3D Scene Failed to Load
+        3D Scene Unavailable
       </h3>
       <p className="mb-6 text-center text-body-md text-light-600 dark:text-dark-400">
-        This device may not support WebGL, or the scene is temporarily unavailable.
+        Spline 3D requires additional dependencies. Install @splinetool/react-spline to enable.
       </p>
       {onRetry && (
         <Button
@@ -91,17 +68,16 @@ function ErrorFallback({ onRetry }: { onRetry?: () => void }) {
 }
 
 /**
- * Interactive 3D scene using Spline (spline.design).
- * Includes hardware detection, error fallback, and performance optimizations.
+ * Placeholder for Spline 3D scene.
+ * Install @splinetool/react-spline to enable actual 3D rendering.
  *
  * @example
  * ```tsx
+ * // Install first: npm install @splinetool/react-spline @splinetool/runtime
  * <SplineScene
  *   scene="https://prod.spline.design/6Wq1Q7YGyM-iab9i/scene.splinecode"
  *   width="100%"
  *   height="500px"
- *   interactive
- *   onMouseDown={(e) => console.log('Clicked:', e.target.name)}
  * />
  * ```
  */
@@ -116,123 +92,55 @@ export function SplineScene({
   fallback,
   onLoad,
   onMouseDown,
-  onMouseHover,
+  onMouseOver,
 }: SplineSceneProps) {
-  const [hasError, setHasError] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const [shouldRender, setShouldRender] = useState(true);
-  const timeoutRef = useRef<NodeJS.Timeout>();
-  const retryCountRef = useRef(0);
-  const maxRetries = 2;
-
-  // Check hardware compatibility on mount
-  useEffect(() => {
-    if (!shouldLoadSpline()) {
-      setShouldRender(false);
-      setHasError(true);
-    }
-  }, []);
-
-  const handleLoad = useCallback((app: any) => {
-    setIsLoading(false);
-    clearTimeout(timeoutRef.current);
-    onLoad?.(app);
-  }, [onLoad]);
-
-  const handleError = useCallback(() => {
-    setIsLoading(false);
-    setHasError(true);
-    clearTimeout(timeoutRef.current);
-  }, []);
+  const [hasError, setHasError] = useState(true); // Default to error since Spline not installed
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleRetry = useCallback(() => {
-    if (retryCountRef.current >= maxRetries) return;
-    
-    retryCountRef.current += 1;
     setHasError(false);
     setIsLoading(true);
-    
-    // Force re-render of Spline component
-    setShouldRender(false);
-    setTimeout(() => setShouldRender(true), 100);
+    setTimeout(() => {
+      setIsLoading(false);
+      setHasError(true); // Still error without dependency
+    }, 1000);
   }, []);
-
-  // Set timeout for loading (8 seconds)
-  useEffect(() => {
-    if (!shouldRender) return;
-    
-    timeoutRef.current = setTimeout(() => {
-      if (isLoading) {
-        console.warn('Spline scene timeout - showing fallback');
-        setHasError(true);
-        setIsLoading(false);
-      }
-    }, 8000);
-
-    return () => {
-      if (timeoutRef.current) clearTimeout(timeoutRef.current);
-    };
-  }, [shouldRender, isLoading]);
-
-  // Don't render on incompatible devices
-  if (!shouldRender) {
-    return fallback || <ErrorFallback />;
-  }
-
-  // Error state
-  if (hasError) {
-    return fallback || <ErrorFallback onRetry={handleRetry} />;
-  }
 
   const containerStyle = {
     width: typeof width === 'number' ? `${width}px` : width,
     height: typeof height === 'number' ? `${height}px` : height,
   };
 
+  // Show placeholder with installation instructions
   return (
     <div
       className={cn(
-        'relative overflow-hidden rounded-2xl',
-        // Prevent layout shift
-        'contain-strict',
-        // Prevent scroll hijacking
-        '[&_canvas]:!overflow-visible',
-        // Watermark hiding (CSS workaround for free plan)
-        hideWatermark && '[&_spline-viewer]::part(logo) { display: none !important }',
+        'relative overflow-hidden rounded-2xl bg-gradient-to-br from-accent-500/5 to-purple-500/5',
+        'contain-strict border border-dashed border-accent-500/30',
         className
       )}
       style={containerStyle}
     >
-      {/* CSS fix for Spline's overflow injection */}
-      <style jsx global>{`
-        /* Prevent Spline from hijacking page scroll */
-        body {
-          overflow: auto !important;
-        }
-        /* Allow clicks through if not interactive */
-        .spline-non-interactive canvas {
-          pointer-events: none !important;
-        }
-      `}</style>
-
-      {shouldRender && (
-        <Suspense fallback={showLoading ? <LoadingFallback /> : null}>
-          <div className={cn(!interactive && 'spline-non-interactive')}>
-            <Spline
-              scene={scene}
-              onLoad={handleLoad}
-              onError={handleError}
-              onMouseDown={onMouseDown}
-              onMouseHover={onMouseHover}
-              style={{
-                width: '100%',
-                height: '100%',
-                display: 'block',
-              }}
-            />
+      <div className="flex h-full w-full flex-col items-center justify-center p-8 text-center">
+        <Cube className="mb-4 h-16 w-16 text-accent-500/50" />
+        <h3 className="mb-2 text-heading-md font-semibold text-light-900 dark:text-dark-50">
+          Spline 3D Scene
+        </h3>
+        <p className="mb-4 text-body-md text-light-600 dark:text-dark-400">
+          Install <code className="rounded bg-light-100 px-2 py-1 font-mono text-body-sm dark:bg-dark-800">@splinetool/react-spline</code> to enable interactive 3D.
+        </p>
+        <div className="rounded-lg bg-light-100 p-4 font-mono text-body-sm dark:bg-dark-800">
+          <div className="text-left">
+            <div className="text-accent-500">npm install @splinetool/react-spline @splinetool/runtime</div>
+            <div className="mt-2 text-light-500 dark:text-dark-400">
+              Then replace this placeholder with actual Spline component.
+            </div>
           </div>
-        </Suspense>
-      )}
+        </div>
+        <div className="mt-6 text-body-sm text-light-500 dark:text-dark-400">
+          Scene URL: <span className="font-mono">{scene.substring(0, 40)}...</span>
+        </div>
+      </div>
 
       {/* Loading overlay */}
       {isLoading && showLoading && (
@@ -240,20 +148,12 @@ export function SplineScene({
           <LoadingFallback />
         </div>
       )}
-
-      {/* Performance warning for low-end devices */}
-      {!shouldLoadSpline() && (
-        <div className="absolute bottom-4 left-4 z-20 rounded-lg bg-warning-500/20 px-3 py-1.5 text-body-sm text-warning-800 dark:text-warning-200">
-          ⚠️ 3D disabled for performance
-        </div>
-      )}
     </div>
   );
 }
 
 /**
- * Interactive Spline scene with controls for object manipulation.
- * Requires objects to be named in Spline editor.
+ * Interactive Spline scene placeholder.
  */
 export function InteractiveSplineScene({
   scene,
@@ -262,57 +162,25 @@ export function InteractiveSplineScene({
 }: SplineSceneProps & {
   objectName?: string;
 }) {
-  const splineApp = useRef<any>();
-  const [lastEvent, setLastEvent] = useState<string>('');
-
-  const handleLoad = useCallback((app: any) => {
-    splineApp.current = app;
-    props.onLoad?.(app);
-  }, [props.onLoad]);
-
-  const handleMouseDown = useCallback((e: any) => {
-    setLastEvent(`Clicked: ${e.target?.name || 'unknown'}`);
-    props.onMouseDown?.(e);
-  }, [props.onMouseDown]);
-
-  const moveObject = useCallback(() => {
-    if (!splineApp.current) return;
-    const obj = splineApp.current.findObjectByName(objectName);
-    if (obj) obj.position.x += 50;
-  }, [objectName]);
-
-  const rotateObject = useCallback(() => {
-    if (!splineApp.current) return;
-    const obj = splineApp.current.findObjectByName(objectName);
-    if (obj) obj.rotation.y += Math.PI / 2; // 90 degrees
-  }, [objectName]);
-
   return (
     <div className="relative">
-      <SplineScene
-        scene={scene}
-        interactive
-        onLoad={handleLoad}
-        onMouseDown={handleMouseDown}
-        {...props}
-      />
+      <SplineScene scene={scene} {...props} />
       
-      {/* Controls overlay */}
-      <div className="absolute bottom-6 left-1/2 z-20 flex -translate-x-1/2 gap-3">
-        <Button size="sm" onClick={moveObject}>
+      {/* Controls overlay (disabled) */}
+      <div className="absolute bottom-6 left-1/2 z-20 flex -translate-x-1/2 gap-3 opacity-50">
+        <Button size="sm" disabled>
           Move Right
         </Button>
-        <Button size="sm" onClick={rotateObject}>
+        <Button size="sm" disabled>
           Rotate 90°
         </Button>
       </div>
 
-      {/* Event log */}
-      {lastEvent && (
-        <div className="absolute top-6 left-1/2 z-20 -translate-x-1/2 rounded-lg bg-dark-950/80 px-4 py-2 text-body-sm text-white backdrop-blur-sm">
-          {lastEvent}
-        </div>
-      )}
+      <div className="absolute top-6 left-1/2 z-20 -translate-x-1/2 rounded-lg bg-dark-950/80 px-4 py-2 text-body-sm text-white backdrop-blur-sm">
+        Install Spline to enable interactions
+      </div>
     </div>
   );
 }
+
+export type { SplineSceneProps };

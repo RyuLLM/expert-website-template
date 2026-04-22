@@ -129,7 +129,7 @@ export function CounterGroup({
  * Individual counter item with label.
  */
 export function CounterItem({
-  value,
+  end,
   label,
   description,
   ...props
@@ -140,7 +140,7 @@ export function CounterItem({
   return (
     <div className="text-center">
       <div className="mb-2 text-heading-2xl font-bold text-accent-500 dark:text-accent-400">
-        <AnimatedCounter {...props} end={value} />
+        <AnimatedCounter {...props} end={end} />
       </div>
       <h3 className="text-heading-md font-semibold text-light-900 dark:text-dark-50">
         {label}
@@ -153,3 +153,5 @@ export function CounterItem({
     </div>
   );
 }
+
+export type { AnimatedCounterProps };
