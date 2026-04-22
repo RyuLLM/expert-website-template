@@ -1,0 +1,40 @@
+{
+  "name": "expert-website-template",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "type-check": "tsc --noEmit",
+    "format": "prettier --write .",
+    "check": "npm run type-check && npm run lint && npm run build",
+    "test": "echo 'Tests not configured. Run npm run check for build validation.'"
+  },
+  "dependencies": {
+    "@splinetool/react-spline": "^2.4.0",
+    "@splinetool/runtime": "^2.4.0",
+    "@types/node": "22.10.6",
+    "@types/react": "19.0.7",
+    "@types/react-dom": "19.0.3",
+    "clsx": "^2.1.1",
+    "framer-motion": "^12.6.4",
+    "lucide-react": "^0.478.0",
+    "next": "14.2.35",
+    "react": "^19",
+    "react-dom": "^19",
+    "tailwind-merge": "^2.6.0",
+    "typescript": "5.7.3"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^8.26.1",
+    "@typescript-eslint/parser": "^8.26.1",
+    "autoprefixer": "^10.4.20",
+    "eslint": "^9.17.0",
+    "eslint-config-next": "14.2.35",
+    "postcss": "^8.5.3",
+    "prettier": "^3.4.2",
+    "tailwindcss": "^3.4.17"
+  }
+}
